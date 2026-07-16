@@ -1,0 +1,1088 @@
+@import url("https://fonts.googleapis.com/css?family=Ubuntu:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+/* ---------------------------------------- DARK / LIGHT MODE COLOR ---------------------------------------- */
+:root {
+	--primary-color-main: #e6f5f8;
+
+	--primary-color-25: #d4f2f4;
+	--primary-color-50: #74e7d4;
+	--primary-color-100: #189ab4;
+	--primary-color-200: #04445f;
+
+	--secondary-color-25: #345d7d;
+	--secondary-color-50: #725b78;
+	--secondary-color-100: #c66e87;
+	--secondary-color-200: #ff7582;
+
+	--background-color-25: #f2f4f7;
+	--background-color-50: #98a2b3;
+	--background-color-100: #475467;
+	--background-color-200: #344054;
+
+	--text-color-25: #1d2538;
+	--text-color-50: #475b74;
+	--text-color-100: #7c8da5;
+	--text-color-200: #e0e1dc;
+
+	--text-color-primary-color-200: #04445f;
+	--text-color-background-color-200: #344054;
+
+	/* database table */
+	--background-header: #f2f4f7;
+	--text-color-database-data: #04445f;
+	--background-database-data-select: #d4f2f4;
+
+	/* button */
+	--onhover-color: #00000040;
+}
+
+.dark-theme {
+	--primary-color-main: #1d2538;
+
+	--primary-color-25: #d4f2f4;
+	--primary-color-50: #74e7d4;
+	--primary-color-100: #189ab4;
+	--primary-color-200: #04445f;
+
+	--secondary-color-25: #345d7d;
+	--secondary-color-50: #725b78;
+	--secondary-color-100: #c66e87;
+	--secondary-color-200: #ff7582;
+
+	--background-color-25: #f2f4f7;
+	--background-color-50: #98a2b3;
+	--background-color-100: #475467;
+	--background-color-200: #344054;
+
+	--text-color-25: #1d2538;
+	--text-color-50: #475b74;
+	--text-color-100: #7c8da5;
+	--text-color-200: #e0e1dc;
+
+	--text-color-primary-color-200: #04445f;
+	--text-color-background-color-200: #344054;
+
+	/* database table */
+	--background-header: #d4f2f4;
+	--text-color-database-data: #74e7d4;
+	--background-database-data-select: #7c8da5;
+
+	/* button */
+	--onhover-color: rgba(24, 154, 180, 0.75);
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	/* overflow-y: scroll; */
+}
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	/* overflow-x: scroll; */
+	background-color: var(--primary-color-main);
+}
+
+.home-page {
+	display: flex;
+	height: 100%;
+	width: 100%;
+	align-items: center;
+	vertical-align: text-top;
+	margin: 0;
+}
+
+canvas {
+	width: 100%;
+	min-height: 100%;
+}
+
+/* ------------------------------------------- FLOATING CONTAINER ------------------------------------------ */
+.container-top-left {
+	position: fixed;
+	z-index: 2;
+	top: 0;
+	left: 0;
+	margin-top: 23px;
+	margin-left: 23px;
+
+	display: flex;
+	flex-direction: row;
+	gap: 30px;
+}
+
+.container-bottom-left {
+	position: fixed;
+	z-index: 2;
+	bottom: 0;
+	left: 0;
+	margin-bottom: 23px;
+	margin-left: 23px;
+
+	display: flex;
+	align-items: flex-start;
+	flex-direction: column;
+	gap: 30px;
+}
+
+.container-bottom-right {
+	position: fixed;
+	z-index: 2;
+	bottom: 0;
+	right: 0;
+	padding-bottom: 23px;
+	padding-right: 23px;
+
+	display: flex;
+	align-items: flex-end;
+	flex-direction: column;
+	gap: 30px;
+}
+
+.container-bottom-right-mr2x {
+	position: fixed;
+	z-index: 2;
+	bottom: 0;
+	/* left: 55%; */
+	/* left: 40%; */
+	right: 0%;
+	padding-bottom: 23px;
+	padding-right: 23px;
+	margin-right: 80px;
+	font-size: 13px;
+}
+
+.container-full-screen-pdf {
+	position: fixed;
+	z-index: 3;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 5% 7% 5% 7%;
+	backdrop-filter: blur(5px);
+
+	display: none;
+	user-select: none;
+}
+
+.container-full-screen-pdf.active {
+	display: block;
+}
+
+.container-full-screen-video {
+	position: fixed;
+	z-index: 3;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 5% 7% 5% 7%;
+	backdrop-filter: blur(5px);
+
+	display: none;
+	user-select: none;
+}
+
+.container-full-screen-video.active {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.loadingScreenContainer {
+	position: fixed;
+	z-index: 4;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	top: 0;
+
+	/* background-color: rgba(0, 0, 0, 0.8); */
+	backdrop-filter: blur(3px);
+	display: flex;
+	gap: 10px;
+
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+
+/* -------------------------------------------- EXPLODE 3D FILE -------------------------------------------- */
+.move-cam-button {
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 500;
+	font-size: 13.9249px;
+	line-height: 21px;
+
+	text-align: center;
+}
+/* -------------------------------------------- EXPLODE 3D FILE -------------------------------------------- */
+.explode-button {
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 500;
+	font-size: 13.9249px;
+	line-height: 21px;
+
+	text-align: center;
+}
+
+/* ---------------------------------------- DARK / LIGHT MODE COLOR ---------------------------------------- */
+.toggle {
+	position: relative;
+	width: 68.21px;
+	height: 34.11px;
+	background: #74e7d4;
+	border-radius: 34.1063px;
+	cursor: pointer;
+}
+
+.toggle.active {
+	background: #189ab4;
+}
+
+.toggle::before {
+	content: "";
+	position: absolute;
+	width: 26.53px;
+	height: 26.53px;
+	background: #189ab4;
+	border-radius: 50%;
+	top: 50%;
+	left: calc(50% - 26.53px / 2 - 15.54px);
+	transform: translateY(-50%);
+	transition: all 0.3s ease-in-out;
+}
+
+.toggle.active::before {
+	left: calc(100% - 26.53px - calc(50% - 26.53px / 2 - 15.54px));
+	background: #74e7d4;
+}
+
+/* -------------------------------------- FOR BUTTON ALBUM/CATALOGUE --------------------------------------- */
+.menu-container-blue-album {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #189ab4;
+	padding: 0;
+	border-radius: 14.3734px;
+	width: 46.99px;
+	height: 46.99px;
+	cursor: pointer;
+	transition: background-color 0.3s ease-in;
+
+	user-select: none;
+}
+
+.menu-container-blue-album:hover {
+	box-shadow: 0px 4px 4px var(--onhover-color);
+}
+
+.menu-container-blue-album.active {
+	background-color: #74e7d4;
+}
+
+/* ------------------------------------ FOR BUTTON LIGHTNING CONTROLLER ------------------------------------ */
+.menu-container-blue-lightning {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #189ab4;
+	padding: 0;
+	border-radius: 14.3734px;
+	width: 46.99px;
+	height: 46.99px;
+	cursor: pointer;
+	transition: background-color 0.3s ease-in;
+}
+
+.menu-container-blue-lightning:hover {
+	box-shadow: 0px 4px 4px var(--onhover-color);
+}
+
+.menu-container-blue-lightning.active {
+	background-color: #74e7d4;
+}
+
+.menu-container-blue-lightning-expand {
+	min-width: 530px;
+	height: 190px;
+
+	background: rgba(242, 244, 247, 0.7);
+	box-shadow: 0px 4px 4px rgba(24, 154, 180, 0.69);
+	border-radius: 5px;
+}
+
+.menu-container-blue-lightning-expand-wrapper {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	gap: 20px;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 700;
+	font-size: 14.8888px;
+	line-height: 17px;
+	text-align: center;
+
+	color: #04445f;
+}
+
+.lightning-title {
+	display: flex;
+	justify-content: center;
+}
+
+.lightning-title-2 {
+	display: flex;
+	justify-content: center;
+}
+
+.opsi-container {
+	display: flex;
+}
+
+.opsi {
+	margin: 0px 0px 0px 8px;
+	font-weight: 400;
+	cursor: pointer;
+}
+
+.opsi.active {
+	font-weight: 700;
+	text-decoration: underline;
+}
+
+.opsi:hover {
+	font-weight: 700;
+	text-decoration: underline;
+}
+
+.lightning-component {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+}
+
+.lightning-component-center {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+}
+
+.slider-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: center;
+
+	font-weight: 400;
+	font-size: 11.5802px;
+	line-height: 13px;
+	text-align: center;
+}
+
+.slider-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/* height: 100%; */
+	width: 170px;
+
+	position: relative;
+}
+
+.bar {
+	position: absolute;
+	z-index: 2;
+	left: 2px;
+	top: 2px;
+	width: 97%;
+	height: 9px;
+
+	border: 0.564516px solid #74e7d4;
+	border-radius: 5.64516px;
+
+	background-color: #d4f2f4;
+	overflow: hiddenss;
+}
+
+.fill {
+	display: block;
+	width: 50%;
+	height: 9px;
+	background-color: #74e7d4;
+	border-radius: 5.64516px;
+}
+
+.slider {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 100%;
+	height: 9px;
+
+	border: 0.564516px solid #74e7d4;
+	border-radius: 5.64516px;
+
+	position: relative;
+	z-index: 3;
+
+	background-color: transparent;
+}
+
+.slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 21.45px;
+	height: 21.45px;
+	background-color: #74e7d4;
+	border: 0.564516px solid #189ab4;
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 0 0 0 rgba(116, 231, 212, 0.25);
+	transition: 0.3s ease-in-out;
+}
+
+.slider::-webkit-slider-thumb:hover {
+	box-shadow: 0 0 0 12px rgba(116, 231, 212, 0.3);
+}
+
+.slider:active::-webkit-slider-thumb {
+	box-shadow: 0 0 0 5px rgba(116, 231, 212, 0.3);
+}
+
+.lightning-component-container {
+	display: flex;
+	margin: 10px 0px 0px 0px;
+	gap: 2px;
+	justify-content: center;
+}
+
+@media screen and (max-width: 900px) {
+	.lightning-title {
+		display: none;
+	}
+
+	.lightning-title-2 {
+		flex-direction: column;
+	}
+
+	.opsi-container {
+		justify-content: center;
+		margin: 3px 0px 5px 0px;
+	}
+
+	.menu-container-blue-lightning-expand-wrapper {
+		gap: 0px;
+	}
+
+	.menu-container-blue-lightning-expand {
+		max-width: 690px;
+		min-width: 180px;
+	}
+
+	.slider-group {
+		margin: 4px 0px;
+	}
+
+	.lightning-component-container {
+		flex-direction: column;
+		margin: 0px;
+	}
+}
+
+/* -------------------------------------------- NAKAYAMA'S TEXT -------------------------------------------- */
+.item-name-container {
+	position: fixed;
+	z-index: 2;
+	top: 0;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 23px;
+
+	width: 228px;
+	background-color: var(--background-color-25);
+	border: 1.74061px solid var(--primary-color-100);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding: 15px 12px;
+}
+
+.text-file-name {
+	position: relative;
+
+	margin: 0px 0px 8px 0px;
+	height: 23.5px;
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 500;
+	font-size: 13.9249px;
+	line-height: 21px;
+
+	text-align: center;
+
+	color: var(--primary-color-200);
+}
+
+.type-container {
+	display: flex;
+	padding: 8.703px 12.184px;
+	align-items: center;
+	gap: 6.962px;
+	align-self: stretch;
+	justify-content: center;
+
+	border: 0.87px solid #189ab4;
+	background: #e6f5f8;
+}
+
+.text-file-type {
+	color: #475b74;
+	font-size: 13.925px;
+	font-family: Inter;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 20.887px;
+}
+
+/* -------------------------------------- CATALOGUE MODEL NUMBER HOME -------------------------------------- */
+.catalogue-container-2 {
+	position: fixed;
+	z-index: 2;
+	top: 0;
+	bottom: 15%;
+	right: 0;
+	margin-right: 23px;
+	margin-top: auto;
+	margin-bottom: auto;
+
+	display: none;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	padding: 12px 18px 12px 18px;
+	gap: 5px;
+
+	width: 225px;
+	height: 55%;
+
+	background: linear-gradient(
+		180deg,
+		#f7fbfc 0%,
+		rgba(233, 254, 255, 0.62) 100%
+	);
+	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+	border-radius: 5px;
+
+	::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+.catalogue-description-title-2 {
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 18px;
+	display: flex;
+	align-items: center;
+	text-align: center;
+
+	min-height: 29px;
+
+	color: #475b74;
+
+	text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+	margin: 1px 16px 0px 0px;
+}
+
+.catalogue-description-2 {
+	overflow-y: scroll;
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 18px;
+	text-align: justify;
+
+	color: var(--text-color-50);
+}
+
+.catalogue-product-list-2 {
+	display: flex;
+	margin-top: 17px;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+
+	padding: 15px 0px 0px 0px;
+
+	border: 1px solid #74e7d4;
+	border-radius: 10px;
+
+	height: 190px;
+	width: 225px;
+
+	cursor: pointer;
+
+	transition: all 0.3s ease-in;
+}
+
+.catalogue-product-list-2:hover {
+	box-shadow: 0px 4px 4px #74e7d4;
+}
+
+.catalogue-product-list-2.active {
+	border: 3px solid #189ab4;
+	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.catalogue-product-list-2.active:hover {
+	box-shadow: 0px 4px 4px #74e7d4;
+}
+
+.catalogue-product-list-text-2 {
+	color: #475b74;
+	text-align: center;
+	font-size: 16px;
+}
+
+.catalogue-image-preview-2 {
+	height: 100%;
+	width: 100%;
+}
+
+/* ----------------------------------------- FOR BUTTON INFORMATION ---------------------------------------- */
+.menu-container-blue-information {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #189ab4;
+	padding: 0;
+	border-radius: 14.3734px;
+	width: 46.99px;
+	height: 46.99px;
+	cursor: pointer;
+	transition: background-color 0.3s ease-in;
+}
+
+.menu-container-blue-information:hover {
+	box-shadow: 0px 4px 4px var(--onhover-color);
+}
+
+.menu-container-blue-information.active {
+	background-color: #74e7d4;
+}
+
+/* ------------------------------------------- FOR BUTTON SOUND -------------------------------------------- */
+.menu-container-blue-sound {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #189ab4;
+	padding: 0;
+	border-radius: 14.3734px;
+	width: 46.99px;
+	height: 46.99px;
+	cursor: pointer;
+	transition: background-color 0.3s ease-in;
+}
+
+.menu-container-blue-sound:hover {
+	box-shadow: 0px 4px 4px var(--onhover-color);
+}
+
+.menu-container-blue-sound.active {
+	background-color: #74e7d4;
+}
+
+/* ------------------------------------------ FOR SOUND CONTAINER ------------------------------------------ */
+.container-bottom-left-ml2x {
+	position: fixed;
+	z-index: 2;
+	bottom: 0;
+	left: 0%;
+	padding-bottom: 23px;
+	padding-left: 23px;
+	margin-left: 70px;
+}
+
+.sound-expand {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+
+	padding: 10px 10px 10px 10px;
+
+	min-width: 149.81px;
+	height: 170px;
+
+	background: rgba(242, 244, 247, 0.7);
+	box-shadow: 0px 4px 4px rgba(24, 154, 180, 0.69);
+	border-radius: 5px;
+
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 700;
+	font-size: 14.8888px;
+	line-height: 17px;
+	text-align: center;
+
+	color: rgba(4, 68, 95, 0.7);
+}
+
+.sound-expand-component {
+	display: flex;
+	gap: 10px;
+	flex-direction: column;
+	align-items: center;
+
+	width: 100%;
+}
+
+.toggle-container {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+
+	font-size: 12px;
+	line-height: 14px;
+}
+
+.toggle-music {
+	position: relative;
+	width: 68.21px;
+	height: 34.11px;
+	background: #74e7d4;
+	border-radius: 34.1063px;
+	cursor: pointer;
+}
+
+.toggle-music.active {
+	background: #189ab4;
+}
+
+.toggle-music::before {
+	content: "";
+	position: absolute;
+	width: 26.53px;
+	height: 26.53px;
+	background: #189ab4;
+	border-radius: 50%;
+	top: 50%;
+	left: calc(50% - 26.53px / 2 - 15.54px);
+	transform: translateY(-50%);
+	transition: all 0.3s ease-in-out;
+}
+
+.toggle-music.active::before {
+	left: calc(100% - 26.53px - calc(50% - 26.53px / 2 - 15.54px));
+	background: #74e7d4;
+}
+
+.toggle-speech {
+	position: relative;
+	width: 68.21px;
+	height: 34.11px;
+	background: #74e7d4;
+	border-radius: 34.1063px;
+	cursor: pointer;
+}
+
+.toggle-speech.active {
+	background: #189ab4;
+}
+
+.toggle-speech::before {
+	content: "";
+	position: absolute;
+	width: 26.53px;
+	height: 26.53px;
+	background: #189ab4;
+	border-radius: 50%;
+	top: 50%;
+	left: calc(50% - 26.53px / 2 - 15.54px);
+	transform: translateY(-50%);
+	transition: all 0.3s ease-in-out;
+}
+
+.toggle-speech.active::before {
+	left: calc(100% - 26.53px - calc(50% - 26.53px / 2 - 15.54px));
+	background: #74e7d4;
+}
+
+@media screen and (max-width: 650px) {
+	.container-bottom-left-ml2x {
+		position: fixed;
+		z-index: 2;
+		bottom: 0;
+		left: 17%;
+		right: 65%;
+		padding: 0px 0px 23px 0px;
+		margin: 0;
+	}
+
+	.sound-expand {
+		/* Box */
+		min-width: 110px;
+		width: 100px;
+	}
+}
+
+/* ------------------------------------------ FOR BUTTON ANIMATION ----------------------------------------- */
+.menu-container-blue-animation {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #189ab4;
+	padding: 0;
+	border-radius: 14.3734px;
+	width: 46.99px;
+	height: 46.99px;
+	cursor: pointer;
+	transition: background-color 0.3s ease-in;
+}
+
+.menu-container-blue-animation:hover {
+	box-shadow: 0px 4px 4px var(--onhover-color);
+}
+
+.menu-container-blue-animation.active {
+	background-color: #74e7d4;
+}
+
+/* ------------------------------------------ INFORMATION SECTION ------------------------------------------ */
+.information-container {
+	position: absolute;
+	z-index: 2;
+	top: 0;
+	bottom: 10%;
+	left: 0;
+	margin-left: 23px;
+	margin-top: auto;
+	margin-bottom: auto;
+
+	flex-direction: column;
+	justify-content: flex-start;
+	padding: 12px 0px 12px 16px;
+	gap: 5px;
+
+	/* width: 250px; */
+	width: 700px;
+	height: 40%;
+
+	background: rgba(212, 242, 244, 0.8);
+
+	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+	border-radius: 15px;
+
+	::-webkit-scrollbar {
+		width: 10px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: #888;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: #555;
+	}
+}
+
+.information-description {
+	overflow-y: scroll;
+
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 18px;
+	text-align: justify;
+	padding-right: 16px;
+
+	color: var(--text-color-50);
+}
+
+.information-description-title {
+	font-weight: 700;
+	font-size: 18px;
+	line-height: 21px;
+	display: flex;
+	align-items: center;
+	text-align: center;
+	justify-content: center;
+
+	color: var(--text-color-25);
+}
+
+.information-description-model-number {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	justify-content: center;
+
+	color: var(--text-color-background-color-200);
+}
+
+.information-description-specification {
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	text-align: justify;
+}
+
+.information-specification-img {
+	width: 100%;
+}
+
+.information-link {
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 18px;
+	text-align: justify;
+	text-decoration-line: underline;
+
+	color: var(--text-color-primary-color-200);
+	padding-right: 16px;
+}
+
+/* ----------------------------------------------- PAGE NAME ----------------------------------------------- */
+.page-name-container {
+	padding: 18px 50px 18px 50px;
+	background: var(--primary-color-50);
+	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+	border-radius: 5px;
+	height: fit-content;
+}
+
+@media (max-width: 1000px) {
+	.page-name-container {
+		display: none;
+	}
+}
+
+.page-name-text {
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 700;
+	font-size: 24px;
+	line-height: 28px;
+	text-align: center;
+	color: var(--primary-color-200);
+}
+
+/* ---------------------------------------------- PDF BUTTON ----------------------------------------------- */
+.pdf_container {
+	display: flex;
+	flex-direction: column;
+	gap: 25px;
+	user-select: none;
+}
+
+.menu-pdf {
+	cursor: pointer;
+}
+
+.menu-pdf:hover {
+	filter: drop-shadow(0px 4px 4px rgba(24, 154, 180, 0.75));
+}
+
+.menu-pdf:active {
+	filter: brightness(0.5);
+}
+
+/* ---------------------------------------------- PDF POP UP ----------------------------------------------- */
+.pdf-pop-up-container {
+	border: 10px solid var(--secondary-color-side-theme-sunset-200, #ff7582);
+	height: 100%;
+	width: 100%;
+}
+
+/* --------------------------------------------- VIDEO BUTTON ---------------------------------------------- */
+.menu-video {
+	cursor: pointer;
+}
+
+.menu-video:hover {
+	filter: drop-shadow(0px 4px 4px rgba(24, 154, 180, 0.75));
+}
+
+.menu-video:active {
+	filter: brightness(0.5);
+}
+
+/* --------------------------------------------- VIDEO POP UP ---------------------------------------------- */
+.pdf-pop-up-container-video {
+	border: 10px solid var(--secondary-color-side-theme-sunset-200, #ff7582);
+	height: fit-content;
+	width: fit-content;
+
+	display: flex;
+}
+
+/* --------------------------------------------- LOADING SCREEN -------------------------------------------- */
+#loadingBarLabel {
+	font-family: "Ubuntu";
+	font-style: normal;
+	font-weight: 700;
+	font-size: 22px;
+	line-height: 17px;
+}
+
+#loadingBar {
+	height: 5%;
+	width: 30%;
+}
+
+/* ----------------------------------------- FOR BUTTON EXPLODE/CUT ---------------------------------------- */
+.menu-container-blue-explode {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #189ab4;
+	padding: 11px 9px;
+	border-radius: 14.3734px;
+	border: 0;
+
+	cursor: pointer;
+	transition: background-color 0.3s ease-in;
+
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 600;
+	font-size: 13.9249px;
+	line-height: 21px;
+	color: rgb(255, 255, 255);
+}
+
+.menu-container-blue-explode:hover {
+	box-shadow: 0px 4px 4px var(--onhover-color);
+}
+
+.menu-container-blue-explode.active {
+	background-color: #74e7d4;
+}
