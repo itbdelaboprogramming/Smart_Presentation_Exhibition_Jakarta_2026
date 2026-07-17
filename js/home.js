@@ -5,6 +5,7 @@ import {
 	CSS2DRenderer,
 	CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 // ---------------------------------------------------------------------------------------
 // ----------------------------------- Const, Var, Let -----------------------------------

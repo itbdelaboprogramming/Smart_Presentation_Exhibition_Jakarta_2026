@@ -10,6 +10,7 @@ import {
 	CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 // ----------------------------------- SCENE BACKGROUND COLOR -----------------------------------
 export const scene = new THREE.Scene();
@@ -127,7 +128,14 @@ loadingManager.onLoad = function () {
 export const loader = new GLTFLoader(loadingManager);
 loader.name = "loader";
 
-let path = "files/" + "VSI Gyropactor.glb";
+let path = "files/" + "Recycling Plant.glb";
+
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath(
+	"https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
+);
+dracoLoader.setDecoderConfig({ type: "js" });
+loader.setDRACOLoader(dracoLoader);
 
 loader.load(
 	path,
