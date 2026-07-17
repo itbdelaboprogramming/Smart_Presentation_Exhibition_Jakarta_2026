@@ -35,7 +35,7 @@
                     <img class="menu-video" src="./assets/Video.svg">
                 </div>
                 <div class="page-name-container">
-                    <div class="page-name-text">Nakayama VSI Gyropactor</div>
+                    <div class="page-name-text">Nakayama ZNS Plant</div>
                 </div>
             </div>
 
@@ -67,14 +67,14 @@
                         <div class="catalogue-product-list-text-2"> VSI Gyropactor </div>
                         <img class="catalogue-image-preview-2" src="./files/SR100C_v1_preview.png" />
                     </div>
-                    <div class="catalogue-product-list-2" id="model_name_2">
+                    <!-- <div class="catalogue-product-list-2" id="model_name_2">
                         <div class="catalogue-product-list-text-2"> VSI Gyropactor & Platform </div>
                         <img class="catalogue-image-preview-2" src="./files/SRユニット_v1_preview.png" />
-                    </div>
-                    <div class="catalogue-product-list-2" id="model_name_3">
+                    </div> -->
+                    <!-- <div class="catalogue-product-list-2" id="model_name_3">
                         <div class="catalogue-product-list-text-2"> Sand Manufacturing Plant </div>
                         <img class="catalogue-image-preview-2" src="./files/sand_manufacturing_plant.png" />
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -166,7 +166,7 @@
 
             <div class="container-bottom-left">
                 <Button class="menu-container-blue-explode" id="explode-button">
-                    Explode/Cut
+                    Animation
                 </Button>
                 <div class="menu-container-blue-information">
                     <img src="./assets/Information-Button.png">
