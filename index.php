@@ -29,6 +29,7 @@
             <canvas id="myCanvas">    </canvas>
             <!-- line annotation -->
             <!-- <canvas id="lineCanvas" style="position: absolute; top: 0; left: 0;"></canvas> -->
+            <svg id="rp-leader-line-svg" class="rp-leader-line-svg"></svg>
             <div class="container-top-left">
                 <div class="pdf_container">
                     <img class="menu-pdf" src="./assets/Pdf.svg">
@@ -181,6 +182,21 @@
                 </div>
             </div>
 
+            <div class="rp-list-popup" id="rp-list-popup"></div>
+
+            <div class="rp-info-popup" id="rp-info-popup">
+                <div class="rp-info-popup-close" id="rp-info-popup-close">&times;</div>
+                <div class="rp-info-popup-header">
+                    <div class="rp-info-popup-badge" id="rp-info-popup-badge"></div>
+                    <div>
+                        <div class="rp-info-popup-title" id="rp-info-popup-title"></div>
+                        <div class="rp-info-popup-title-en" id="rp-info-popup-title-en"></div>
+                    </div>
+                </div>
+                <img class="rp-info-popup-image" id="rp-info-popup-image" style="display:none;">
+                <div class="rp-info-popup-description" id="rp-info-popup-description"></div>
+            </div>
+
             <div class="container-bottom-right">
                 <div class="menu-container-blue-album">
                     <img src="./assets/Album-Button.png">
@@ -209,6 +225,7 @@
 
             <script type="module" src="script.js"> </script>
             <script type="module" src="./js/home.js"></script>
+            <script type="module" src="./js/recyclingPlant.js"></script>
         </div>
     </body>
 </html>

@@ -1,0 +1,27 @@
+*.glb
+*.gltf
+
+*.glb.nodenames.txt
+
+# ===== OS junk =====
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# ===== Editor / IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== Dependencies & build =====
+node_modules/
+dist/
+build/
+
+# ===== Logs & temp =====
+*.log
+npm-debug.log*
+*.tmp

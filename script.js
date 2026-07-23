@@ -21,7 +21,7 @@ export const camera = new THREE.PerspectiveCamera(
 	60,
 	myCanvas.offsetWidth / myCanvas.offsetHeight
 );
-camera.position.set(6, 4, -4);
+camera.position.set(15, 17, -16);
 camera.layers.enableAll();
 
 // ----------------------------------------- GRID HELPER ----------------------------------------
@@ -98,12 +98,15 @@ labelRenderer.setSize(window.innerWidth, window.innerHeight);
 labelRenderer.domElement.style.position = "absolute";
 labelRenderer.domElement.style.zIndex = 1;
 labelRenderer.domElement.style.top = "0px";
+labelRenderer.domElement.style.pointerEvents = "none";
 document.body.appendChild(labelRenderer.domElement);
 
 export const orbitControls = new OrbitControls(
 	camera,
-	labelRenderer.domElement
+	renderer.domElement
 );
+orbitControls.target.set(-0.26, 3.34, -0.23);
+orbitControls.update();
 
 // --------------------------------------- 3D FILE LOADER ---------------------------------------
 const loadingScreenBar = document.getElementById("loadingBar");
@@ -145,7 +148,7 @@ loader.load(
 		scene.add(file3D);
 		file3D.layers.enableAll();
 
-		file3D.position.set(0, -0.95, 0);
+		file3D.position.set(0, 0, 0);
 	},
 	undefined,
 	function (error) {
@@ -198,8 +201,15 @@ loader.load(
 // }
 
 // ----------------------------------------- RENDER LOOP ----------------------------------------
+export const frameCallbacks = [];
+
 renderer.setAnimationLoop(() => {
 	orbitControls.update();
+
+	camera.updateMatrixWorld();
+	camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+	for (let i = 0; i < frameCallbacks.length; i++) frameCallbacks[i]();
+
 	labelRenderer.render(scene, camera);
 	renderer.render(scene, camera);
 });
@@ -217,3 +227,9 @@ window.addEventListener("resize", () => {
 	camera.updateProjectionMatrix();
 	labelRenderer.setSize(window.innerWidth - 0.5, window.innerHeight - 0.5);
 });
+
+// --------------------------------- DEV: MESH TAGGING TOOL --------------------------------
+// http://localhost/delabo/Smart_Presentation_Exhibition_Jakarta/index.php?tag=1
+if (new URLSearchParams(window.location.search).has("tag")) {
+	import("./js/recyclingPlantTagTool.js").then((module) => module.init());
+}

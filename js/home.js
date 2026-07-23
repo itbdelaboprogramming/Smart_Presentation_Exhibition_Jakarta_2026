@@ -6,6 +6,10 @@ import {
 	CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import {
+	activateRecyclingPlant,
+	deactivateRecyclingPlant,
+} from "./recyclingPlant.js";
 
 // ---------------------------------------------------------------------------------------
 // ----------------------------------- Const, Var, Let -----------------------------------
@@ -320,16 +324,10 @@ const video = document.getElementById("video");
 explode_button.addEventListener("click", () => {
 	explode_button.classList.toggle("active");
 
-	let file3D = scene.getObjectByName("file3D");
-
-	if (product_list_text == "VSI Gyropactor") {
-		// SR100C_v1(obj);
-		SR100C_v1(file3D);
-	} else if (product_list_text == "VSI Gyropactor & Platform") {
-		// SRユニット_v1(obj);
-		SRユニット_v1(file3D);
-	} else if (product_list_text == "Sand Manufacturing Plant") {
-		SandManufacturingPlant(file3D);
+	if (explode_button.classList.contains("active")) {
+		activateRecyclingPlant();
+	} else {
+		deactivateRecyclingPlant();
 	}
 });
 
