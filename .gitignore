@@ -21,6 +21,9 @@ node_modules/
 dist/
 build/
 
+!vendor/
+!vendor/**
+
 # ===== Logs & temp =====
 *.log
 npm-debug.log*

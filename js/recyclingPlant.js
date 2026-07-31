@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { scene, camera, orbitControls, frameCallbacks } from "../script.js";
 import { annotations as annotationsData, DEFAULT_VIEW } from "./recyclingPlantAnnotationsStore.js";
+import { initOutline, setOutline, clearOutline } from "./recyclingPlantOutline.js";
 
 const explodeButton = document.getElementById("explode-button");
 const listPopup = document.getElementById("rp-list-popup");
@@ -13,21 +14,19 @@ const infoPopupTitle = document.getElementById("rp-info-popup-title");
 const infoPopupTitleEn = document.getElementById("rp-info-popup-title-en");
 const infoPopupImage = document.getElementById("rp-info-popup-image");
 const infoPopupDescription = document.getElementById("rp-info-popup-description");
-const HIGHLIGHT_EMISSIVE = 0x189ab4;
-const HIGHLIGHT_INTENSITY_MIN = 1.6;
-const HIGHLIGHT_INTENSITY_MAX = 3.2;
 const ENABLE_OCCLUSION = true;
 const OCCLUSION_INTERVAL_MS = 250;
+const GHOST_COLOR = 0xe6eef0;
+const GHOST_OPACITY = 1; // 0.3 for see-through, 1 for solid
 
 let activated = false;
 let focusedId = null;
 let meshByName = null;
-let highlightApplied = false;
+let ghostMaterial = null;
+const ghostedMeshes = [];
 
 const occlusionRaycaster = new THREE.Raycaster();
 let lastOcclusionCheck = 0;
-let focusPulse = null; 
-const focusedMeshes = []; 
 
 // id -> { listItem, dot?, dotEl?, label?, labelEl?, line?, anchor?, labelOffset? }
 const markerEntries = new Map();
@@ -311,58 +310,58 @@ function restoreDimOthers() {
 
 // ------------------------------------------- mesh highlight -------------------------------------------
 
-function applyMeshHighlight(meshNames) {
-	if (!meshNames || meshNames.length === 0) return; // not tagged yet - camera+popup still work
-	const map = buildMeshMap();
-	const glowMats = [];
-
-	meshNames.forEach((name) => {
-		const mesh = map.get(name);
-		if (!mesh || !mesh.material) return;
-		if (mesh.userData.rpOrigMat === undefined) mesh.userData.rpOrigMat = mesh.material;
-		const orig = mesh.userData.rpOrigMat;
-		const cloneOne = (m) => {
-			const c = m.clone();
-			if (c.emissive) {
-				c.emissive.setHex(HIGHLIGHT_EMISSIVE);
-				if (c.emissiveIntensity !== undefined) c.emissiveIntensity = HIGHLIGHT_INTENSITY_MIN;
-				glowMats.push(c);
-			}
-			return c;
-		};
-		mesh.material = Array.isArray(orig) ? orig.map(cloneOne) : cloneOne(orig);
-		focusedMeshes.push(mesh);
-	});
-
-	if (glowMats.length) {
-		focusPulse = gsap.to(glowMats, {
-			emissiveIntensity: HIGHLIGHT_INTENSITY_MAX,
-			duration: 1.1,
-			ease: "sine.inOut",
-			yoyo: true,
-			repeat: -1,
+function getGhostMaterial() {
+	if (!ghostMaterial) {
+		ghostMaterial = new THREE.MeshStandardMaterial({
+			color: GHOST_COLOR,
+			roughness: 1,
+			metalness: 0,
+			transparent: GHOST_OPACITY < 1,
+			opacity: GHOST_OPACITY,
+			depthWrite: true,
 		});
 	}
-
-	highlightApplied = true;
+	return ghostMaterial;
 }
 
-function restoreMeshHighlight() {
-	if (!highlightApplied) return;
-	if (focusPulse) {
-		focusPulse.kill();
-		focusPulse = null;
-	}
-	focusedMeshes.forEach((mesh) => {
-		const cur = mesh.material;
-		(Array.isArray(cur) ? cur : [cur]).forEach((m) => m && m.dispose && m.dispose());
+function applyGhost(keep) {
+	restoreGhost(); 
+	const ghost = getGhostMaterial();
+	buildMeshMap().forEach((mesh) => {
+		if (keep.has(mesh)) return;
+		if (mesh.userData.rpOrigMat === undefined) mesh.userData.rpOrigMat = mesh.material;
+		mesh.material = ghost;
+		ghostedMeshes.push(mesh);
+	});
+}
+
+function restoreGhost() {
+	ghostedMeshes.forEach((mesh) => {
 		if (mesh.userData.rpOrigMat !== undefined) {
 			mesh.material = mesh.userData.rpOrigMat;
 			delete mesh.userData.rpOrigMat;
 		}
 	});
-	focusedMeshes.length = 0;
-	highlightApplied = false;
+	ghostedMeshes.length = 0;
+}
+
+function applyMeshHighlight(meshNames) {
+	if (!meshNames || meshNames.length === 0) return; 
+	const map = buildMeshMap();
+	const meshes = [];
+	meshNames.forEach((name) => {
+		const mesh = map.get(name);
+		if (mesh) meshes.push(mesh);
+	});
+	if (!meshes.length) return;
+
+	applyGhost(new Set(meshes));
+	setOutline("highlight", meshes);
+}
+
+function restoreMeshHighlight() {
+	restoreGhost();
+	clearOutline("highlight");
 }
 
 // ------------------------------------------- info popup -------------------------------------------
@@ -420,6 +419,7 @@ function focusAnnotation(id) {
 	explodeButton.disabled = true;
 
 	flyCamera(ann.camera.position, ann.camera.target, ann.camera.duration || 1.8, () => {
+		if (focusedId !== id) return;
 		orbitControls.enabled = true;
 		explodeButton.disabled = false;
 		applyMeshHighlight(ann.meshNames);
@@ -473,6 +473,7 @@ export async function activateRecyclingPlant() {
 	if (activated) return;
 	await waitForModel();
 	buildMeshMap();
+	initOutline(); 
 
 	removeAllMarkers();
 	createMarkersAndList();

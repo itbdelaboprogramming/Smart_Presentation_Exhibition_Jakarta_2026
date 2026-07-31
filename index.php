@@ -4,25 +4,32 @@
         <title>Smart Presentation</title>
         <link rel="icon" type="image/x-icon" href="assets/SR_logo_03_red.png">
         <meta charset="UTF-8">
-        <!-- <script type="importmap">
-            {
-                "imports": {
-                "three": "https://unpkg.com/three@0.153.0/build/three.module.js"
-                }
-            } 
-        </script> -->
-        <script src="https://cdn.jsdelivr.net/npm/gsap@3.2.4/dist/gsap.js"></script>
-        <link rel="stylesheet" href="./style/style.css" >
-        <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
+        <!-- ============================== OFFLINE ============================== -->
+        <script src="./vendor/gsap/gsap.js"></script>
+        <script async src="./vendor/es-module-shims/es-module-shims.js"></script>
         <script type="importmap">
             {
                 "imports": {
-                "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+                    "three": "./vendor/three/build/three.module.js",
+                    "three/addons/": "./vendor/three/examples/jsm/"
                 }
             }
         </script>
+
+        <!-- ============================== ONLINE =============================== -->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/gsap@3.2.4/dist/gsap.js"></script>
+        <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+                }
+            }
+        </script> -->
+
+        <link rel="stylesheet" href="./style/style.css" >
     </head>
     <body>
         <div class="home-page">
@@ -198,9 +205,9 @@
             </div>
 
             <div class="container-bottom-right">
-                <div class="menu-container-blue-album">
+                <!-- <div class="menu-container-blue-album">
                     <img src="./assets/Album-Button.png">
-                </div>
+                </div> -->
                 <div class="menu-container-blue-lightning">
                     <img src="./assets/Lightning-Button.png">
                 </div>

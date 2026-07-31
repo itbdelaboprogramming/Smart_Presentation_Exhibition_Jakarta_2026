@@ -10,30 +10,38 @@ import {
 	deactivateRecyclingPlant,
 	getMeshMap,
 } from "./recyclingPlant.js";
+import { initOutline, setOutline, clearAllOutlines } from "./recyclingPlantOutline.js";
 
-const SELECT_COLOR = 0xffa500; // clicked, not yet added
-const GROUP_COLOR = 0x2fbf71; // already in the current annotation's group
+const SELECT_COLOR = 0xffa500; 
+const GROUP_COLOR = 0x2fbf71; 
 const ANCHOR_COLOR = 0xff5a5a;
 const DEFAULT_LABEL_LIFT = 1.5;
+const MAX_GROUP_ROWS = 250; 
 
 let currentId = store[0] && store[0].id;
 let selected = new Set(); // 3D object
 let meshByName = null;
 let allNodeNames = [];
 let lastHit = null;
-const tintedMeshes = new Set(); 
+const tinted = new Map(); // mesh -> applied hex
 let anchorMarker = null;
-const el = {}; 
+let marqueeEl = null;
+let suppressClick = false;
+const el = {};
 
 export function init() {
 	waitForModel().then((file3D) => {
 		meshByName = getMeshMap();
 		allNodeNames = [...meshByName.keys()];
 		anchorMarker = makeMarker(file3D);
+		initOutline();
 		buildUI();
 		wireRaycaster();
+		wireMarquee();
 		selectAnnotation(currentId);
-		console.info("[tagTool] ready - click parts on the model to tag them.");
+		console.info(
+			"[tagTool] ready - click parts to tag, Shift+drag to box-select, Shift+Alt+drag to deselect."
+		);
 	});
 }
 
@@ -65,6 +73,16 @@ function getCurrent() {
 	return store.find((a) => a.id === currentId);
 }
 
+const centerCache = new WeakMap();
+
+function meshCenter(mesh) {
+	let c = centerCache.get(mesh);
+	if (c) return c;
+	c = new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3());
+	centerCache.set(mesh, c);
+	return c;
+}
+
 // -------------------------------- tinting --------------------------------
 
 function disposeMeshClones(mesh) {
@@ -75,7 +93,7 @@ function disposeMeshClones(mesh) {
 function tint(mesh, hex) {
 	if (!mesh) return;
 	if (mesh.userData.rptOrigMat === undefined) mesh.userData.rptOrigMat = mesh.material;
-	else disposeMeshClones(mesh); 
+	else disposeMeshClones(mesh);
 	const orig = mesh.userData.rptOrigMat;
 	const cloneOne = (m) => {
 		const c = m.clone();
@@ -83,22 +101,42 @@ function tint(mesh, hex) {
 		return c;
 	};
 	mesh.material = Array.isArray(orig) ? orig.map(cloneOne) : cloneOne(orig);
-	tintedMeshes.add(mesh);
+	tinted.set(mesh, hex);
+}
+
+function untint(mesh) {
+	disposeMeshClones(mesh);
+	mesh.material = mesh.userData.rptOrigMat;
+	delete mesh.userData.rptOrigMat;
+	tinted.delete(mesh);
 }
 
 function clearTints() {
-	tintedMeshes.forEach((mesh) => {
-		disposeMeshClones(mesh);
-		mesh.material = mesh.userData.rptOrigMat;
-		delete mesh.userData.rptOrigMat;
-	});
-	tintedMeshes.clear();
+	[...tinted.keys()].forEach(untint);
 }
 
 function repaint() {
-	clearTints();
-	getCurrent().meshNames.forEach((n) => tint(meshByName.get(n), GROUP_COLOR));
-	selected.forEach((o) => tint(o, SELECT_COLOR));
+	const want = new Map();
+	const groupMeshes = [];
+	(getCurrent().meshNames || []).forEach((n) => {
+		const m = meshByName.get(n);
+		if (!m) return;
+		want.set(m, GROUP_COLOR);
+		if (!selected.has(m)) groupMeshes.push(m); 
+	});
+	selected.forEach((o) => want.set(o, SELECT_COLOR)); 
+
+	const stale = [];
+	tinted.forEach((hex, mesh) => {
+		if (want.get(mesh) !== hex) stale.push(mesh);
+	});
+	stale.forEach(untint);
+	want.forEach((hex, mesh) => {
+		if (tinted.get(mesh) !== hex) tint(mesh, hex);
+	});
+
+	setOutline("group", groupMeshes);
+	setOutline("select", [...selected]);
 }
 
 function updateAnchorMarker() {
@@ -114,11 +152,15 @@ function updateAnchorMarker() {
 // -------------------------------- selection + picking --------------------------------
 
 function wireRaycaster() {
-	const dom = orbitControls.domElement; 
+	const dom = orbitControls.domElement;
 	const raycaster = new THREE.Raycaster();
 	const pointer = new THREE.Vector2();
 
 	dom.addEventListener("click", (e) => {
+		if (suppressClick) {
+			suppressClick = false;
+			return;
+		}
 		const rect = dom.getBoundingClientRect();
 		pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
 		pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -140,13 +182,100 @@ function wireRaycaster() {
 	});
 }
 
+// -------------------------------- box select --------------------------------
+
+function wireMarquee() {
+	const dom = orbitControls.domElement;
+	let dragging = false;
+	let start = null;
+
+	marqueeEl = document.createElement("div");
+	marqueeEl.className = "rpt-marquee";
+	marqueeEl.style.display = "none";
+	document.body.appendChild(marqueeEl);
+
+	dom.addEventListener("pointerdown", (e) => {
+		suppressClick = false; 
+		if (!e.shiftKey || e.button !== 0) return;
+		e.preventDefault();
+		dragging = true;
+		start = { x: e.clientX, y: e.clientY };
+		orbitControls.enabled = false;
+		drawMarquee(start, start);
+		marqueeEl.style.display = "block";
+	});
+
+	window.addEventListener("pointermove", (e) => {
+		if (!dragging) return;
+		drawMarquee(start, { x: e.clientX, y: e.clientY });
+	});
+
+	window.addEventListener("pointerup", (e) => {
+		if (!dragging) return;
+		dragging = false;
+		marqueeEl.style.display = "none";
+		orbitControls.enabled = true;
+		suppressClick = true; 
+
+		const rect = {
+			left: Math.min(start.x, e.clientX),
+			right: Math.max(start.x, e.clientX),
+			top: Math.min(start.y, e.clientY),
+			bottom: Math.max(start.y, e.clientY),
+		};
+		if (rect.right - rect.left < 3 && rect.bottom - rect.top < 3) return; 
+
+		selectInRect(rect, e.altKey);
+	});
+}
+
+function drawMarquee(a, b) {
+	marqueeEl.style.left = Math.min(a.x, b.x) + "px";
+	marqueeEl.style.top = Math.min(a.y, b.y) + "px";
+	marqueeEl.style.width = Math.abs(a.x - b.x) + "px";
+	marqueeEl.style.height = Math.abs(a.y - b.y) + "px";
+}
+
+function selectInRect(rect, subtract) {
+	const canvasRect = orbitControls.domElement.getBoundingClientRect();
+	camera.updateMatrixWorld();
+
+	const ndc = new THREE.Vector3();
+	meshByName.forEach((mesh) => {
+		ndc.copy(meshCenter(mesh)).project(camera);
+		if (ndc.z > 1) return; // behind the camera
+		const x = canvasRect.left + (ndc.x * 0.5 + 0.5) * canvasRect.width;
+		const y = canvasRect.top + (-ndc.y * 0.5 + 0.5) * canvasRect.height;
+		if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return;
+		if (subtract) selected.delete(mesh);
+		else selected.add(mesh);
+	});
+
+	repaint();
+	renderEditor();
+	renderFilter();
+}
+
 // -------------------------------- actions --------------------------------
 
 function addSelection() {
 	const ann = getCurrent();
+	if (!ann.meshNames) ann.meshNames = [];
 	selected.forEach((o) => {
 		if (o.name && !ann.meshNames.includes(o.name)) ann.meshNames.push(o.name);
 	});
+	selected.clear();
+	saveProgress();
+	repaint();
+	renderAll();
+}
+
+/** Bulk counterpart to Add selection: drop every selected mesh from the group. */
+function excludeSelection() {
+	const ann = getCurrent();
+	if (!selected.size) return alert("Pilih dulu part yang mau dikeluarkan.");
+	const drop = new Set([...selected].map((o) => o.name));
+	ann.meshNames = (ann.meshNames || []).filter((n) => !drop.has(n));
 	selected.clear();
 	saveProgress();
 	repaint();
@@ -162,7 +291,7 @@ function clearSelection() {
 
 function removeFromGroup(name) {
 	const ann = getCurrent();
-	ann.meshNames = ann.meshNames.filter((n) => n !== name);
+	ann.meshNames = (ann.meshNames || []).filter((n) => n !== name);
 	saveProgress();
 	repaint();
 	renderAll();
@@ -170,8 +299,9 @@ function removeFromGroup(name) {
 
 function clearGroup() {
 	const ann = getCurrent();
-	if (!ann.meshNames.length) return;
-	if (!confirm(`Hapus semua ${ann.meshNames.length} mesh dari "${ann.title}"?`)) return;
+	const total = (ann.meshNames || []).length;
+	if (!total) return;
+	if (!confirm(`Hapus semua ${total} mesh dari "${ann.title}"?`)) return;
 	ann.meshNames = [];
 	saveProgress();
 	repaint();
@@ -220,13 +350,15 @@ function resetCamera() {
 
 function preview() {
 	clearTints();
+	clearAllOutlines();
 	anchorMarker.visible = false;
 	deactivateRecyclingPlant();
 	setTimeout(() => activateRecyclingPlant(), 1600);
 }
 
 function exportJSON() {
-	const blob = new Blob([JSON.stringify(store, null, 2)], { type: "application/json" });
+	const clean = store.map(({ region, exclude, ...rest }) => rest);
+	const blob = new Blob([JSON.stringify(clean, null, 2)], { type: "application/json" });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement("a");
 	a.href = url;
@@ -258,15 +390,22 @@ function buildUI() {
 	const panel = document.createElement("div");
 	panel.className = "rpt-panel";
 	panel.innerHTML = `
-		<div class="rpt-head">Tag Tool</div>
+		<div class="rpt-head">
+			<span>Tag Tool</span>
+			<button class="rpt-toggle" id="rpt-toggle" title="Collapse / expand">▾</button>
+		</div>
 		<div class="rpt-body">
 			<div class="rpt-list" id="rpt-list"></div>
 
 			<div class="rpt-editor">
 				<div class="rpt-sel-name" id="rpt-sel-name"></div>
 				<div class="rpt-sel-meta" id="rpt-sel-meta"></div>
+				<div class="rpt-hint">Shift+drag = box select · Shift+Alt+drag = deselect</div>
 				<div class="rpt-actions">
-					<button class="rpt-btn primary" id="rpt-add">Add Selection</button>
+					<button class="rpt-btn primary" id="rpt-add">Add selection</button>
+					<button class="rpt-btn" id="rpt-exclude">Exclude selection</button>
+				</div>
+				<div class="rpt-actions">
 					<button class="rpt-btn" id="rpt-clear-sel">Clear selection</button>
 				</div>
 				<div class="rpt-actions">
@@ -310,6 +449,7 @@ function buildUI() {
 	el.flist = panel.querySelector("#rpt-flist");
 
 	panel.querySelector("#rpt-add").onclick = addSelection;
+	panel.querySelector("#rpt-exclude").onclick = excludeSelection;
 	panel.querySelector("#rpt-clear-sel").onclick = clearSelection;
 	panel.querySelector("#rpt-anchor").onclick = setAnchor;
 	panel.querySelector("#rpt-anchor-reset").onclick = resetAnchor;
@@ -320,6 +460,13 @@ function buildUI() {
 	panel.querySelector("#rpt-export").onclick = exportJSON;
 	panel.querySelector("#rpt-reset").onclick = resetAll;
 	el.filter.addEventListener("input", renderFilter);
+
+	const collapsed = localStorage.getItem("rptCollapsed") === "1";
+	if (collapsed) panel.classList.add("collapsed");
+	panel.querySelector(".rpt-head").onclick = () => {
+		const isCollapsed = panel.classList.toggle("collapsed");
+		localStorage.setItem("rptCollapsed", isCollapsed ? "1" : "0");
+	};
 }
 
 function renderAll() {
@@ -340,7 +487,7 @@ function renderList() {
 				<span class="rpt-num">${ann.order}</span>
 				<span class="rpt-row-name" title="${ann.title} — ${ann.titleEn}">${ann.title}</span>
 				<span class="rpt-dots">
-					<span class="rpt-dot ${ann.meshNames.length ? "on" : ""}" title="mesh"></span>
+					<span class="rpt-dot ${(ann.meshNames || []).length ? "on" : ""}" title="mesh"></span>
 					<span class="rpt-dot ${ann.anchor ? "on" : ""}" title="anchor"></span>
 					<span class="rpt-dot ${ann.camera ? "on" : ""}" title="camera"></span>
 				</span>
@@ -355,25 +502,32 @@ function renderEditor() {
 	el.selName.textContent = `${ann.order}. ${ann.title}`;
 	const ok = (b) => (b ? "✓" : "–");
 	el.selMeta.textContent =
-		`${ann.meshNames.length} mesh · anchor ${ok(!!ann.anchor)} · camera ${ok(!!ann.camera)}` +
+		`${(ann.meshNames || []).length} mesh · anchor ${ok(!!ann.anchor)} · camera ${ok(!!ann.camera)}` +
 		(selected.size ? ` · selected ${selected.size}` : "");
 }
 
 function renderGroup() {
-	const ann = getCurrent();
-	el.count.textContent = String(ann.meshNames.length);
+	const names = getCurrent().meshNames || [];
+	el.count.textContent = String(names.length);
 	el.group.innerHTML = "";
-	if (!ann.meshNames.length) {
+	if (!names.length) {
 		el.group.innerHTML = `<div class="rpt-empty">Empty.</div>`;
 		return;
 	}
-	ann.meshNames.forEach((name) => {
+
+	names.slice(0, MAX_GROUP_ROWS).forEach((name) => {
 		const row = document.createElement("div");
 		row.className = "rpt-gitem";
 		row.innerHTML = `<span title="${name}">${name}</span><span class="x">✕</span>`;
 		row.querySelector(".x").onclick = () => removeFromGroup(name);
 		el.group.appendChild(row);
 	});
+	if (names.length > MAX_GROUP_ROWS) {
+		const more = document.createElement("div");
+		more.className = "rpt-empty";
+		more.textContent = `… +${names.length - MAX_GROUP_ROWS} more`;
+		el.group.appendChild(more);
+	}
 }
 
 function renderFilter() {
