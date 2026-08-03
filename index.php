@@ -176,9 +176,9 @@
                 <Button class="menu-container-blue-explode" id="explode-button">
                     Animation
                 </Button>
-                <div class="menu-container-blue-information">
+                <!-- <div class="menu-container-blue-information">
                     <img src="./assets/Information-Button.png">
-                </div>
+                </div> -->
                 <div class="menu-container-blue-sound">
                     <img src="./assets/Sound-Off-Button.png" id="sound-off">
                     <img src="./assets/Sound-On-Button.png" id="sound-on" style="display: none;">
@@ -200,8 +200,8 @@
                         <div class="rp-info-popup-title-en" id="rp-info-popup-title-en"></div>
                     </div>
                 </div>
-                <img class="rp-info-popup-image" id="rp-info-popup-image" style="display:none;">
-                <div class="rp-info-popup-description" id="rp-info-popup-description"></div>
+                <div class="rp-info-popup-body" id="rp-info-popup-body"></div>
+                <div class="rp-info-popup-footer" id="rp-info-popup-footer"></div>
             </div>
 
             <div class="container-bottom-right">

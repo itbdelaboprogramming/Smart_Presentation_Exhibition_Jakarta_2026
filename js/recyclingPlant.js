@@ -3,6 +3,9 @@ import { CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { scene, camera, orbitControls, frameCallbacks } from "../script.js";
 import { annotations as annotationsData, DEFAULT_VIEW } from "./recyclingPlantAnnotationsStore.js";
 import { initOutline, setOutline, clearOutline } from "./recyclingPlantOutline.js";
+import { setVoiceOverContext } from "./voiceOver.js";
+import { renderPopupBody } from "./recyclingPlantPopup.js";
+import { closeVideoPopup } from "./videoPopup.js";
 
 const explodeButton = document.getElementById("explode-button");
 const listPopup = document.getElementById("rp-list-popup");
@@ -12,8 +15,8 @@ const infoPopupClose = document.getElementById("rp-info-popup-close");
 const infoPopupBadge = document.getElementById("rp-info-popup-badge");
 const infoPopupTitle = document.getElementById("rp-info-popup-title");
 const infoPopupTitleEn = document.getElementById("rp-info-popup-title-en");
-const infoPopupImage = document.getElementById("rp-info-popup-image");
-const infoPopupDescription = document.getElementById("rp-info-popup-description");
+const infoPopupBody = document.getElementById("rp-info-popup-body");
+const infoPopupFooter = document.getElementById("rp-info-popup-footer");
 const ENABLE_OCCLUSION = true;
 const OCCLUSION_INTERVAL_MS = 250;
 const GHOST_COLOR = 0xe6eef0;
@@ -369,20 +372,14 @@ function restoreMeshHighlight() {
 function openInfoPopup(ann) {
 	if (infoPopupBadge) infoPopupBadge.textContent = ann.order;
 	infoPopupTitle.textContent = ann.title;
-	infoPopupTitleEn.textContent = ann.titleEn;
-	infoPopupDescription.textContent = (ann.popup && ann.popup.description) || "";
-	if (ann.popup && ann.popup.image) {
-		infoPopupImage.src = ann.popup.image;
-		infoPopupImage.style.display = "block";
-	} else {
-		infoPopupImage.removeAttribute("src");
-		infoPopupImage.style.display = "none";
-	}
+	// infoPopupTitleEn.textContent = ann.titleEn;
+	renderPopupBody(infoPopupBody, infoPopupFooter, ann.popup);
 	infoPopup.classList.add("active");
 }
 
 function closeInfoPopup() {
 	infoPopup.classList.remove("active");
+	closeVideoPopup();
 }
 
 // ------------------------------------------- camera flight -------------------------------------------
@@ -414,6 +411,7 @@ function focusAnnotation(id) {
 	focusedId = id;
 	setActiveStates(id);
 	dimOthers(id);
+	setVoiceOverContext(id);
 
 	orbitControls.enabled = false;
 	explodeButton.disabled = true;
@@ -430,6 +428,7 @@ function focusAnnotation(id) {
 function unfocusAnnotation() {
 	if (!focusedId) return;
 	focusedId = null;
+	setVoiceOverContext(null);
 
 	restoreMeshHighlight();
 	closeInfoPopup();
@@ -489,6 +488,7 @@ export function deactivateRecyclingPlant() {
 
 	if (focusedId) {
 		focusedId = null;
+		setVoiceOverContext(null);
 		restoreMeshHighlight();
 		closeInfoPopup();
 	}

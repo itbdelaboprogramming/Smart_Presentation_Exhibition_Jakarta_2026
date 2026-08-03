@@ -10,6 +10,8 @@ import {
 	activateRecyclingPlant,
 	deactivateRecyclingPlant,
 } from "./recyclingPlant.js";
+import { setVoiceOverEnabled, setVoiceOverContext } from "./voiceOver.js";
+import { openVideoPopup } from "./videoPopup.js";
 
 // ---------------------------------------------------------------------------------------
 // ----------------------------------- Const, Var, Let -----------------------------------
@@ -254,16 +256,8 @@ const iconSoundOn = document.getElementById("sound-on");
 const soundExpand = document.querySelector(".sound-expand");
 
 let change_audio = "model_name_1";
-let soundStatus = 0;
 
 var audio = new Audio("./audio/podcast-18169.mp3");
-var audio_speech = new Audio("./audio/Play.ht - VSI Gyropactor.wav");
-var audio_speech_2 = new Audio(
-	"./audio/Play.ht - VSI Gyropactor & Platform.wav"
-);
-var audio_speech_3 = new Audio("./audio/Play.ht - Full Plant.wav");
-
-var sound = audio_speech;
 
 let audioOwner = null; // "music" | "speech" | "video" | null
 
@@ -273,9 +267,7 @@ function stopMusic() {
 }
 
 function stopSpeech() {
-	soundStatus = 0;
-	sound.pause();
-	sound.currentTime = 0;
+	setVoiceOverEnabled(false);
 	toggle_speech.classList.remove("active");
 }
 
@@ -309,31 +301,6 @@ function musicPlayer() {
 	audio.play();
 }
 
-function audioPlayer() {
-	if (change_audio === "model_name_1") {
-		sound = audio_speech;
-	} else if (change_audio === "model_name_2") {
-		sound = audio_speech_2;
-	} else if (change_audio === "model_name_3") {
-		sound = audio_speech_3;
-	}
-
-	if (typeof soundStatus !== "undefined" && soundStatus === 1) {
-		sound.addEventListener(
-			"ended",
-			function () {
-				setTimeout(() => {
-					if (audioOwner !== "speech") return; 
-					audioPlayer();
-				}, 30000);
-			},
-			{ once: true }
-		);
-	}
-
-	sound.play();
-}
-
 const toggle_music = document.querySelector(".toggle-music");
 const toggle_speech = document.querySelector(".toggle-speech");
 
@@ -350,7 +317,6 @@ const informationContainer = document.getElementById("information-container");
 
 // ------------------------------------- video button ------------------------------------
 const video_button = document.querySelector(".menu-video");
-const video_pop_up = document.querySelector(".container-full-screen-video");
 const video = document.getElementById("video");
 
 // ---------------------------------------------------------------------------------------
@@ -521,22 +487,11 @@ toggle_music.addEventListener("click", () => {
 toggle_speech.addEventListener("click", () => {
 	toggle_speech.classList.toggle("active");
 
-	if (change_audio === "model_name_1") {
-		sound = audio_speech;
-	} else if (change_audio === "model_name_2") {
-		sound = audio_speech_2;
-	} else if (change_audio === "model_name_3") {
-		sound = audio_speech_3;
-	}
-
 	if (toggle_speech.classList.contains("active")) {
 		claimAudio("speech"); // silences music and video
-		soundStatus = 1;
-		audioPlayer();
+		setVoiceOverEnabled(true);
 	} else {
-		soundStatus = 0;
-		sound.pause();
-		sound.currentTime = 0;
+		setVoiceOverEnabled(false);
 		releaseAudio("speech");
 	}
 });
@@ -557,36 +512,24 @@ menuAnimation.addEventListener("click", () => {
 });
 
 // ------------------------------------- information -------------------------------------
-menuInformation.addEventListener("click", () => {
-	menuInformation.classList.toggle("active");
+if (menuInformation && informationContainer) {
+	menuInformation.addEventListener("click", () => {
+		menuInformation.classList.toggle("active");
 
-	if (menuInformation.classList.contains("active")) {
-		informationContainer.style.display = "flex";
-	} else {
-		informationContainer.style.display = "none";
-	}
-});
+		if (menuInformation.classList.contains("active")) {
+			informationContainer.style.display = "flex";
+		} else {
+			informationContainer.style.display = "none";
+		}
+	});
+}
 
 // ------------------------------------- video button ------------------------------------
-video_button.addEventListener("click", () => {
-	video_pop_up.classList.toggle("active");
-});
+video_button.addEventListener("click", () => openVideoPopup());
 
 video.addEventListener("play", () => claimAudio("video"));
 video.addEventListener("pause", () => releaseAudio("video"));
 video.addEventListener("ended", () => releaseAudio("video"));
-
-video_pop_up.addEventListener("click", function (e) {
-	if (
-		!document.getElementById("pdf-pop-up-container-video").contains(e.target)
-	) {
-		if (video_pop_up.classList.contains("active")) {
-			video_pop_up.classList.remove("active");
-			video.pause();
-			video.currentTime = 0;
-		}
-	}
-});
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------- FUNCTION HELPER ------------------------------------
@@ -1061,9 +1004,7 @@ function loadCatalogue(catalogue_product_list) {
 		product_list.addEventListener("click", () => {
 			if (product_list.id != change_audio) {
 				change_audio = product_list.id;
-				sound.pause();
-				sound.currentTime = 0;
-				toggle_speech.classList.contains("active") ? audioPlayer() : "";
+				setVoiceOverContext(null);
 			}
 
 			resetCatalogueSelect();
