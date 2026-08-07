@@ -347,12 +347,12 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a1-feeder-comparison.png",
+          "src": "./files/annotations/a1-feeder-comparison_en.png",
           "caption": "Scalping grizzly feeder vs. integrated grizzly feeder"
         },
         {
           "type": "image",
-          "src": "./files/annotations/a1-feeder-photo.png",
+          "src": "./files/annotations/a1-feeder-photo_en.png",
           "caption": "Plate feeder <b>PFS1024</b> with grizzly screen <b>GST1111</b>"
         },
         {
@@ -361,7 +361,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a1-feeder-spec.png",
+          "src": "./files/annotations/a1-feeder-spec_en.png",
           "caption": "Plate feeder <b>PFS1024</b> and grizzly screen <b>GST1111</b>"
         }
       ]
@@ -813,7 +813,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a2-jaw-crusher-photo.png",
+          "src": "./files/annotations/a2-jaw-crusher-photo_en.png",
           "caption": "Jaw crusher <b>RC3624</b>"
         },
         {
@@ -834,7 +834,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a2-jaw-crusher-spec.png",
+          "src": "./files/annotations/a2-jaw-crusher-spec_en.png",
           "caption": "Specifications — <b>RC3624</b>"
         },
         {
@@ -1140,7 +1140,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a4-air-separator-flow.png",
+          "src": "./files/annotations/a4-air-separator-flow_en.png",
           "caption": "Flow of the suction separator, product and waste"
         },
         {
@@ -1162,7 +1162,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a4-air-separator-spec.png",
+          "src": "./files/annotations/a4-air-separator-spec_en.png",
           "caption": "Suction separator <b>AS1200</b> and screen <b>NSR4102A</b>"
         },
         // {
@@ -1223,7 +1223,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a5-screen-unit-photo.png",
+          "src": "./files/annotations/a5-screen-unit-photo_en.png",
           "caption": "Screen unit with suction hood"
         },
         {
@@ -1824,7 +1824,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a7-impact-crusher-photo.png",
+          "src": "./files/annotations/a7-impact-crusher-photo_en.png",
           "caption": "Impact crusher <b>ACD1B</b>"
         },
         {
@@ -1845,7 +1845,7 @@ const annotations =
         },
         {
           "type": "image",
-          "src": "./files/annotations/a7-impact-crusher-spec.png",
+          "src": "./files/annotations/a7-impact-crusher-spec_en.png",
           "caption": "Specifications — <b>ACD1B</b>"
         },
         {
