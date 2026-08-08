@@ -36,8 +36,10 @@ const divisions = 50;
 const colorCenterLine = 0xffffff;
 const colorGrid = 0xffffff;
 
+export const GRID_Y = 0.05;
+
 const grid = new THREE.GridHelper(size, divisions, colorCenterLine, colorGrid);
-grid.position.y = -1;
+grid.position.y = GRID_Y;
 grid.name = "grid";
 scene.add(grid);
 

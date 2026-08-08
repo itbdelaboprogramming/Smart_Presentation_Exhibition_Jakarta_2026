@@ -1,4 +1,4 @@
-import { scene, camera, orbitControls, loader } from "../script.js";
+import { scene, camera, orbitControls, loader, GRID_Y } from "../script.js";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -344,7 +344,7 @@ if (getMode && getMode === "dark-theme") {
 	scene.remove(scene.getObjectByName("grid"));
 
 	const grid = new THREE.GridHelper(50, 50, 0x475b74, 0x475b74);
-	grid.position.y = -1;
+	grid.position.y = GRID_Y;
 	grid.name = "grid";
 	scene.add(grid);
 
@@ -362,7 +362,7 @@ toggle.addEventListener("click", () => {
 		scene.remove(scene.getObjectByName("grid"));
 
 		const grid = new THREE.GridHelper(50, 50, 0x475b74, 0x475b74);
-		grid.position.y = -1;
+		grid.position.y = GRID_Y;
 		grid.name = "grid";
 		scene.add(grid);
 
@@ -372,7 +372,7 @@ toggle.addEventListener("click", () => {
 
 		scene.remove(scene.getObjectByName("grid"));
 		const grid = new THREE.GridHelper(50, 50, 0xffffff, 0xffffff);
-		grid.position.y = -1;
+		grid.position.y = GRID_Y;
 		grid.name = "grid";
 		scene.add(grid);
 

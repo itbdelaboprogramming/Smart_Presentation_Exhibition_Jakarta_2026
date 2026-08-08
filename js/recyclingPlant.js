@@ -21,6 +21,7 @@ const ENABLE_OCCLUSION = true;
 const OCCLUSION_INTERVAL_MS = 250;
 const GHOST_COLOR = 0xe6eef0;
 const GHOST_OPACITY = 1; // 0.3 for see-through, 1 for solid
+const FRAMED_EPSILON = 0.05;
 
 let activated = false;
 let focusedId = null;
@@ -35,10 +36,7 @@ let lastOcclusionCheck = 0;
 const markerEntries = new Map();
 
 if (infoPopupClose) {
-	infoPopupClose.addEventListener("click", () => {
-		closeInfoPopup();
-		if (focusedId) unfocusAnnotation();
-	});
+	infoPopupClose.addEventListener("click", closeInfoPopup);
 }
 
 // ------------------------------------------- helpers -------------------------------------------
@@ -111,10 +109,13 @@ function worldToScreen(vector3) {
 }
 
 function updateLeaderLines() {
+	const file3D = getFile3D();
+	if (!file3D) return;
+
 	markerEntries.forEach((entry) => {
 		if (!entry.line) return;
-		const a = worldToScreen(entry.anchor);
-		const b = worldToScreen(entry.labelOffset);
+		const a = worldToScreen(file3D.localToWorld(entry.anchor.clone()));
+		const b = worldToScreen(file3D.localToWorld(entry.labelOffset.clone()));
 		entry.line.setAttribute("x1", a.x);
 		entry.line.setAttribute("y1", a.y);
 		entry.line.setAttribute("x2", b.x);
@@ -283,15 +284,6 @@ function setActiveStates(id) {
 	});
 }
 
-function clearActiveStates() {
-	markerEntries.forEach((entry) => {
-		entry.listItem.classList.remove("active");
-		if (entry.dotEl) entry.dotEl.classList.remove("active");
-		if (entry.labelEl) entry.labelEl.classList.remove("active");
-		if (entry.line) entry.line.classList.remove("active");
-	});
-}
-
 function dimOthers(id) {
 	markerEntries.forEach((entry, key) => {
 		const dim = key !== id;
@@ -299,15 +291,6 @@ function dimOthers(id) {
 		if (entry.dotEl) entry.dotEl.classList.toggle("rp-dim", dim);
 		if (entry.labelEl) entry.labelEl.classList.toggle("rp-dim", dim);
 		if (entry.line) entry.line.classList.toggle("rp-dim", dim);
-	});
-}
-
-function restoreDimOthers() {
-	markerEntries.forEach((entry) => {
-		entry.listItem.classList.remove("rp-dim");
-		if (entry.dotEl) entry.dotEl.classList.remove("rp-dim");
-		if (entry.labelEl) entry.labelEl.classList.remove("rp-dim");
-		if (entry.line) entry.line.classList.remove("rp-dim");
 	});
 }
 
@@ -399,6 +382,13 @@ function flyCamera(position, target, duration, onComplete) {
 	return tl;
 }
 
+function isAlreadyFramed(cam) {
+	return (
+		camera.position.distanceTo(toVector3(cam.position)) < FRAMED_EPSILON &&
+		orbitControls.target.distanceTo(toVector3(cam.target)) < FRAMED_EPSILON
+	);
+}
+
 function focusAnnotation(id) {
 	const ann = annotationsData.find((a) => a.id === id);
 	if (!ann) return;
@@ -413,35 +403,22 @@ function focusAnnotation(id) {
 	dimOthers(id);
 	setVoiceOverContext(id);
 
-	orbitControls.enabled = false;
-	explodeButton.disabled = true;
-
-	flyCamera(ann.camera.position, ann.camera.target, ann.camera.duration || 1.8, () => {
+	const settle = () => {
 		if (focusedId !== id) return;
 		orbitControls.enabled = true;
 		explodeButton.disabled = false;
 		applyMeshHighlight(ann.meshNames);
 		openInfoPopup(ann);
-	});
-}
+	};
 
-function unfocusAnnotation() {
-	if (!focusedId) return;
-	focusedId = null;
-	setVoiceOverContext(null);
-
-	restoreMeshHighlight();
-	closeInfoPopup();
-	clearActiveStates();
+	if (isAlreadyFramed(ann.camera)) {
+		settle();
+		return;
+	}
 
 	orbitControls.enabled = false;
 	explodeButton.disabled = true;
-
-	flyCamera(DEFAULT_VIEW.position, DEFAULT_VIEW.target, 1.5, () => {
-		orbitControls.enabled = true;
-		explodeButton.disabled = false;
-		restoreDimOthers();
-	});
+	flyCamera(ann.camera.position, ann.camera.target, ann.camera.duration || 1.8, settle);
 }
 
 function onAnnotationPicked(id) {
@@ -462,7 +439,6 @@ function onAnnotationPicked(id) {
 		return;
 	}
 
-	if (focusedId === id) return;
 	focusAnnotation(id);
 }
 
