@@ -4,31 +4,39 @@
         <title>Smart Presentation</title>
         <link rel="icon" type="image/x-icon" href="assets/SR_logo_03_red.png">
         <meta charset="UTF-8">
-        <!-- <script type="importmap">
-            {
-                "imports": {
-                "three": "https://unpkg.com/three@0.153.0/build/three.module.js"
-                }
-            } 
-        </script> -->
-        <script src="https://cdn.jsdelivr.net/npm/gsap@3.2.4/dist/gsap.js"></script>
-        <link rel="stylesheet" href="./style/style.css" >
-        <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
+        <!-- ============================== OFFLINE ============================== -->
+        <script src="./vendor/gsap/gsap.js"></script>
+        <script async src="./vendor/es-module-shims/es-module-shims.js"></script>
         <script type="importmap">
             {
                 "imports": {
-                "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+                    "three": "./vendor/three/build/three.module.js",
+                    "three/addons/": "./vendor/three/examples/jsm/"
                 }
             }
         </script>
+
+        <!-- ============================== ONLINE =============================== -->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/gsap@3.2.4/dist/gsap.js"></script>
+        <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+                }
+            }
+        </script> -->
+
+        <link rel="stylesheet" href="./style/style.css" >
     </head>
     <body>
         <div class="home-page">
             <canvas id="myCanvas">    </canvas>
             <!-- line annotation -->
             <!-- <canvas id="lineCanvas" style="position: absolute; top: 0; left: 0;"></canvas> -->
+            <svg id="rp-leader-line-svg" class="rp-leader-line-svg"></svg>
             <div class="container-top-left">
                 <div class="pdf_container">
                     <img class="menu-pdf" src="./assets/Pdf.svg">
@@ -168,9 +176,9 @@
                 <Button class="menu-container-blue-explode" id="explode-button">
                     Animation
                 </Button>
-                <div class="menu-container-blue-information">
+                <!-- <div class="menu-container-blue-information">
                     <img src="./assets/Information-Button.png">
-                </div>
+                </div> -->
                 <div class="menu-container-blue-sound">
                     <img src="./assets/Sound-Off-Button.png" id="sound-off">
                     <img src="./assets/Sound-On-Button.png" id="sound-on" style="display: none;">
@@ -181,10 +189,25 @@
                 </div>
             </div>
 
-            <div class="container-bottom-right">
-                <div class="menu-container-blue-album">
-                    <img src="./assets/Album-Button.png">
+            <div class="rp-list-popup" id="rp-list-popup"></div>
+
+            <div class="rp-info-popup" id="rp-info-popup">
+                <div class="rp-info-popup-close" id="rp-info-popup-close">&times;</div>
+                <div class="rp-info-popup-header">
+                    <div class="rp-info-popup-badge" id="rp-info-popup-badge"></div>
+                    <div>
+                        <div class="rp-info-popup-title" id="rp-info-popup-title"></div>
+                        <div class="rp-info-popup-title-en" id="rp-info-popup-title-en"></div>
+                    </div>
                 </div>
+                <div class="rp-info-popup-body" id="rp-info-popup-body"></div>
+                <div class="rp-info-popup-footer" id="rp-info-popup-footer"></div>
+            </div>
+
+            <div class="container-bottom-right">
+                <!-- <div class="menu-container-blue-album">
+                    <img src="./assets/Album-Button.png">
+                </div> -->
                 <div class="menu-container-blue-lightning">
                     <img src="./assets/Lightning-Button.png">
                 </div>
@@ -194,12 +217,12 @@
 
             <div class="container-full-screen-pdf">
                 <div class="pdf-pop-up-container" id="pdf-pop-up-container">
-                    <embed src="./files/SR_en_ver.2.06_20220523.pdf#scrollbar=0&toolbar=0&view=FitH" type="application/pdf" width="100%" height="100%"/>
+                    <embed src="./files/ZNCplant_en_ver.1.00_20260717.pdf#scrollbar=0&toolbar=0&view=FitH" type="application/pdf" width="100%" height="100%"/>
                 </div>
             </div>
             <div class="container-full-screen-video">
                 <div class="pdf-pop-up-container-video" id="pdf-pop-up-container-video">
-                    <video id="video" width="100%" height="auto" src="./files/中山鉄工所ジャイロパクタ SRシリーズ.mp4" type="video/mp4" controls></video>
+                    <video id="video" width="100%" height="auto" src="./files/zns_plant_raw_40mb.mp4" type="video/mp4" controls></video>
                 </div>
             </div>
             <div class="loadingScreenContainer" style="display: none">
@@ -209,6 +232,7 @@
 
             <script type="module" src="script.js"> </script>
             <script type="module" src="./js/home.js"></script>
+            <script type="module" src="./js/recyclingPlant.js"></script>
         </div>
     </body>
 </html>

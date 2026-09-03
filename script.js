@@ -1,3 +1,9 @@
+// ================================= OFFLINE =================================
+const DRACO_PATH = "./vendor/draco/";
+
+// ================================= ONLINE ==================================
+// const DRACO_PATH = "https://www.gstatic.com/draco/versioned/decoders/1.5.6/";
+
 const myCanvas = document.querySelector("#myCanvas");
 // var myText = document.getElementById("myText").textContent;
 
@@ -21,7 +27,7 @@ export const camera = new THREE.PerspectiveCamera(
 	60,
 	myCanvas.offsetWidth / myCanvas.offsetHeight
 );
-camera.position.set(6, 4, -4);
+camera.position.set(15, 17, -16);
 camera.layers.enableAll();
 
 // ----------------------------------------- GRID HELPER ----------------------------------------
@@ -30,8 +36,10 @@ const divisions = 50;
 const colorCenterLine = 0xffffff;
 const colorGrid = 0xffffff;
 
+export const GRID_Y = 0.05;
+
 const grid = new THREE.GridHelper(size, divisions, colorCenterLine, colorGrid);
-grid.position.y = -1;
+grid.position.y = GRID_Y;
 grid.name = "grid";
 scene.add(grid);
 
@@ -44,50 +52,47 @@ scene.add(grid);
 		+z left
 */
 
-// ---------------------------------- LIGHTNING CUSTOM: AMBIENT ---------------------------------
+// ------------------------------------- LIGHTNING: AMBIENT -------------------------------------
 const ambientLight = new THREE.HemisphereLight(
 	"white", // bright sky color
 	"grey", // dim ground color
-	0 // intensity
+	0.5 // intensity
 );
 ambientLight.name = "ambientLight";
 scene.add(ambientLight);
 
-// -------------------------------- LIGHTNING CUSTOM: DIRECTIONAL -------------------------------
-var dirLight = new THREE.DirectionalLight(0x404040, 0);
+// ----------------------------------- LIGHTNING: DIRECTIONAL -----------------------------------
+var dirLight = new THREE.DirectionalLight(0x404040, 20);
 dirLight.name = "dirLight";
 dirLight.position.set(100, 100, -10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// --------------------------- LIGHTNING DEFAULT: FRONT ABOVE CENTER ----------------------------
+// ----------------------------- LIGHTNING: POINT LIGHTS (off) ----------------------------------
 const r = 20;
-const light1 = new THREE.PointLight(0xffffff, 1, 0);
+const light1 = new THREE.PointLight(0xffffff, 0, 0);
 light1.name = "light1";
 light1.position.set(r, r, 0);
 light1.shadowMapVisible = true;
 scene.add(light1);
 
-// ----------------------------- LIGHTNING DEFAULT: BACK ABOVE LEFT -----------------------------
-const light2 = new THREE.PointLight(0xffffff, 1, 0);
+const light2 = new THREE.PointLight(0xffffff, 0, 0);
 light2.name = "light2";
 light2.position.set(-0.5 * r, r, 0.866 * r);
 scene.add(light2);
 
-// ---------------------------- LIGHTNING DEFAULT: BACK ABOVE RIGHT -----------------------------
-const light3 = new THREE.PointLight(0xffffff, 1, 0);
+const light3 = new THREE.PointLight(0xffffff, 0, 0);
 light3.name = "light3";
 light3.position.set(-0.5 * r, r, -0.866 * r);
 scene.add(light3);
 
-// --------------------------- LIGHTNING DEFAULT: CENTER BELOW CENTER ---------------------------
-const light4 = new THREE.PointLight(0xffffff, 1, 0);
+const light4 = new THREE.PointLight(0xffffff, 0, 0);
 light4.name = "light4";
 light4.position.set(0, -r, 0);
 scene.add(light4);
 
-// --------------------------- LIGHTNING DEFAULT: CENTER BELOW CENTER ---------------------------
-const renderer = new THREE.WebGLRenderer({ canvas: myCanvas });
+// ------------------------------------------ RENDERER ------------------------------------------
+export const renderer = new THREE.WebGLRenderer({ canvas: myCanvas });
 renderer.setClearColor(0xff0000, 1.0);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(myCanvas.offsetWidth, myCanvas.offsetHeight);
@@ -98,12 +103,15 @@ labelRenderer.setSize(window.innerWidth, window.innerHeight);
 labelRenderer.domElement.style.position = "absolute";
 labelRenderer.domElement.style.zIndex = 1;
 labelRenderer.domElement.style.top = "0px";
+labelRenderer.domElement.style.pointerEvents = "none";
 document.body.appendChild(labelRenderer.domElement);
 
 export const orbitControls = new OrbitControls(
 	camera,
-	labelRenderer.domElement
+	renderer.domElement
 );
+orbitControls.target.set(-0.26, 3.34, -0.23);
+orbitControls.update();
 
 // --------------------------------------- 3D FILE LOADER ---------------------------------------
 const loadingScreenBar = document.getElementById("loadingBar");
@@ -131,9 +139,7 @@ loader.name = "loader";
 let path = "files/" + "Recycling Plant.glb";
 
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath(
-	"https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
-);
+dracoLoader.setDecoderPath(DRACO_PATH);
 dracoLoader.setDecoderConfig({ type: "js" });
 loader.setDRACOLoader(dracoLoader);
 
@@ -145,7 +151,7 @@ loader.load(
 		scene.add(file3D);
 		file3D.layers.enableAll();
 
-		file3D.position.set(0, -0.95, 0);
+		file3D.position.set(0, 0, 0);
 	},
 	undefined,
 	function (error) {
@@ -198,10 +204,23 @@ loader.load(
 // }
 
 // ----------------------------------------- RENDER LOOP ----------------------------------------
+export const frameCallbacks = [];
+
+let renderOverride = null;
+export function setRenderOverride(fn) {
+	renderOverride = fn;
+}
+
 renderer.setAnimationLoop(() => {
 	orbitControls.update();
+
+	camera.updateMatrixWorld();
+	camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+	for (let i = 0; i < frameCallbacks.length; i++) frameCallbacks[i]();
+
 	labelRenderer.render(scene, camera);
-	renderer.render(scene, camera);
+	if (renderOverride) renderOverride();
+	else renderer.render(scene, camera);
 });
 
 // ---------------------------------------- RESIZE CANVAS ---------------------------------------
@@ -217,3 +236,9 @@ window.addEventListener("resize", () => {
 	camera.updateProjectionMatrix();
 	labelRenderer.setSize(window.innerWidth - 0.5, window.innerHeight - 0.5);
 });
+
+// --------------------------------- DEV: MESH TAGGING TOOL --------------------------------
+// http://localhost/delabo/Smart_Presentation_Exhibition_Jakarta/index.php?tag=1
+if (new URLSearchParams(window.location.search).has("tag")) {
+	import("./js/recyclingPlantTagTool.js").then((module) => module.init());
+}

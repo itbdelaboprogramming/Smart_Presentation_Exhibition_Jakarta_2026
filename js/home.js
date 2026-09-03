@@ -1,4 +1,4 @@
-import { scene, camera, orbitControls, loader } from "../script.js";
+import { scene, camera, orbitControls, loader, GRID_Y } from "../script.js";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -6,6 +6,12 @@ import {
 	CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import {
+	activateRecyclingPlant,
+	deactivateRecyclingPlant,
+} from "./recyclingPlant.js";
+import { setVoiceOverEnabled, setVoiceOverContext } from "./voiceOver.js";
+import { openVideoPopup } from "./videoPopup.js";
 
 // ---------------------------------------------------------------------------------------
 // ----------------------------------- Const, Var, Let -----------------------------------
@@ -250,47 +256,49 @@ const iconSoundOn = document.getElementById("sound-on");
 const soundExpand = document.querySelector(".sound-expand");
 
 let change_audio = "model_name_1";
-let soundStatus = 0;
 
 var audio = new Audio("./audio/podcast-18169.mp3");
-var audio_speech = new Audio("./audio/Play.ht - VSI Gyropactor.wav");
-var audio_speech_2 = new Audio(
-	"./audio/Play.ht - VSI Gyropactor & Platform.wav"
-);
-var audio_speech_3 = new Audio("./audio/Play.ht - Full Plant.wav");
 
-var sound = audio_speech;
+let audioOwner = null; // "music" | "speech" | "video" | null
 
-function musicPlayer() {
-	audio.addEventListener("ended", function () {
-		// Delay the next call to musicPlayer by 30000 milliseconds
-		setTimeout(() => {
-			musicPlayer();
-		}, 30000);
-	});
-
-	audio.play();
+function stopMusic() {
+	audio.pause();
+	toggle_music.classList.remove("active");
 }
 
-function audioPlayer() {
-	if (change_audio === "model_name_1") {
-		sound = audio_speech;
-	} else if (change_audio === "model_name_2") {
-		sound = audio_speech_2;
-	} else if (change_audio === "model_name_3") {
-		sound = audio_speech_3;
-	}
+function stopSpeech() {
+	setVoiceOverEnabled(false);
+	toggle_speech.classList.remove("active");
+}
 
-	if (typeof soundStatus !== "undefined" && soundStatus === 1) {
-		sound.addEventListener("ended", function () {
-			// Delay the next call to audioPlayer by 30000 milliseconds
+function stopVideo() {
+	if (!video.paused) video.pause();
+}
+
+function claimAudio(owner) {
+	if (owner !== "music") stopMusic();
+	if (owner !== "speech") stopSpeech();
+	if (owner !== "video") stopVideo();
+	audioOwner = owner;
+}
+
+function releaseAudio(owner) {
+	if (audioOwner === owner) audioOwner = null;
+}
+
+function musicPlayer() {
+	audio.addEventListener(
+		"ended",
+		function () {
 			setTimeout(() => {
-				audioPlayer();
+				if (audioOwner !== "music") return; 
+				musicPlayer();
 			}, 30000);
-		});
-	}
+		},
+		{ once: true }
+	);
 
-	sound.play();
+	audio.play();
 }
 
 const toggle_music = document.querySelector(".toggle-music");
@@ -309,7 +317,6 @@ const informationContainer = document.getElementById("information-container");
 
 // ------------------------------------- video button ------------------------------------
 const video_button = document.querySelector(".menu-video");
-const video_pop_up = document.querySelector(".container-full-screen-video");
 const video = document.getElementById("video");
 
 // ---------------------------------------------------------------------------------------
@@ -320,16 +327,10 @@ const video = document.getElementById("video");
 explode_button.addEventListener("click", () => {
 	explode_button.classList.toggle("active");
 
-	let file3D = scene.getObjectByName("file3D");
-
-	if (product_list_text == "VSI Gyropactor") {
-		// SR100C_v1(obj);
-		SR100C_v1(file3D);
-	} else if (product_list_text == "VSI Gyropactor & Platform") {
-		// SRユニット_v1(obj);
-		SRユニット_v1(file3D);
-	} else if (product_list_text == "Sand Manufacturing Plant") {
-		SandManufacturingPlant(file3D);
+	if (explode_button.classList.contains("active")) {
+		activateRecyclingPlant();
+	} else {
+		deactivateRecyclingPlant();
 	}
 });
 
@@ -343,7 +344,7 @@ if (getMode && getMode === "dark-theme") {
 	scene.remove(scene.getObjectByName("grid"));
 
 	const grid = new THREE.GridHelper(50, 50, 0x475b74, 0x475b74);
-	grid.position.y = -1;
+	grid.position.y = GRID_Y;
 	grid.name = "grid";
 	scene.add(grid);
 
@@ -361,7 +362,7 @@ toggle.addEventListener("click", () => {
 		scene.remove(scene.getObjectByName("grid"));
 
 		const grid = new THREE.GridHelper(50, 50, 0x475b74, 0x475b74);
-		grid.position.y = -1;
+		grid.position.y = GRID_Y;
 		grid.name = "grid";
 		scene.add(grid);
 
@@ -371,7 +372,7 @@ toggle.addEventListener("click", () => {
 
 		scene.remove(scene.getObjectByName("grid"));
 		const grid = new THREE.GridHelper(50, 50, 0xffffff, 0xffffff);
-		grid.position.y = -1;
+		grid.position.y = GRID_Y;
 		grid.name = "grid";
 		scene.add(grid);
 
@@ -434,15 +435,17 @@ slider_lamp.addEventListener("input", () => {
 });
 
 // -------------------------------------- catalogue --------------------------------------
-menuAlbum.addEventListener("click", () => {
-	menuAlbum.classList.toggle("active");
+if (menuAlbum) {
+	menuAlbum.addEventListener("click", () => {
+		menuAlbum.classList.toggle("active");
 
-	if (menuAlbum.classList.contains("active")) {
-		catalogueContainer.style.display = "flex";
-	} else {
-		catalogueContainer.style.display = "none";
-	}
-});
+		if (menuAlbum.classList.contains("active")) {
+			catalogueContainer.style.display = "flex";
+		} else {
+			catalogueContainer.style.display = "none";
+		}
+	});
+}
 
 loadCatalogue(catalogue_product_list);
 
@@ -473,30 +476,23 @@ toggle_music.addEventListener("click", () => {
 	toggle_music.classList.toggle("active");
 
 	if (toggle_music.classList.contains("active")) {
+		claimAudio("music"); // silences voice-over and video
 		musicPlayer();
 	} else {
 		audio.pause();
+		releaseAudio("music");
 	}
 });
 
 toggle_speech.addEventListener("click", () => {
 	toggle_speech.classList.toggle("active");
 
-	if (change_audio === "model_name_1") {
-		sound = audio_speech;
-	} else if (change_audio === "model_name_2") {
-		sound = audio_speech_2;
-	} else if (change_audio === "model_name_3") {
-		sound = audio_speech_3;
-	}
-
 	if (toggle_speech.classList.contains("active")) {
-		soundStatus = 1;
-		audioPlayer();
+		claimAudio("speech"); // silences music and video
+		setVoiceOverEnabled(true);
 	} else {
-		soundStatus = 0;
-		sound.pause();
-		sound.currentTime = 0;
+		setVoiceOverEnabled(false);
+		releaseAudio("speech");
 	}
 });
 
@@ -516,32 +512,24 @@ menuAnimation.addEventListener("click", () => {
 });
 
 // ------------------------------------- information -------------------------------------
-menuInformation.addEventListener("click", () => {
-	menuInformation.classList.toggle("active");
+if (menuInformation && informationContainer) {
+	menuInformation.addEventListener("click", () => {
+		menuInformation.classList.toggle("active");
 
-	if (menuInformation.classList.contains("active")) {
-		informationContainer.style.display = "flex";
-	} else {
-		informationContainer.style.display = "none";
-	}
-});
+		if (menuInformation.classList.contains("active")) {
+			informationContainer.style.display = "flex";
+		} else {
+			informationContainer.style.display = "none";
+		}
+	});
+}
 
 // ------------------------------------- video button ------------------------------------
-video_button.addEventListener("click", () => {
-	video_pop_up.classList.toggle("active");
-});
+video_button.addEventListener("click", () => openVideoPopup());
 
-video_pop_up.addEventListener("click", function (e) {
-	if (
-		!document.getElementById("pdf-pop-up-container-video").contains(e.target)
-	) {
-		if (video_pop_up.classList.contains("active")) {
-			video_pop_up.classList.remove("active");
-			video.pause();
-			video.currentTime = 0;
-		}
-	}
-});
+video.addEventListener("play", () => claimAudio("video"));
+video.addEventListener("pause", () => releaseAudio("video"));
+video.addEventListener("ended", () => releaseAudio("video"));
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------- FUNCTION HELPER ------------------------------------
@@ -964,13 +952,14 @@ function updateLightning(opsi_text) {
 		custom_lightning.style.display = "none";
 		lightning_expand.style.height = "190px";
 
-		ambientLight.intensity = 0;
-		dirLight.intensity = 0;
+		ambientLight.intensity = 0.5;
+		dirLight.intensity = 20;
+		dirLight.position.set(100, 100, -10);
 
-		light1.intensity = 1;
-		light2.intensity = 1;
-		light3.intensity = 1;
-		light4.intensity = 1;
+		light1.intensity = 0;
+		light2.intensity = 0;
+		light3.intensity = 0;
+		light4.intensity = 0;
 	}
 }
 
@@ -1015,9 +1004,7 @@ function loadCatalogue(catalogue_product_list) {
 		product_list.addEventListener("click", () => {
 			if (product_list.id != change_audio) {
 				change_audio = product_list.id;
-				sound.pause();
-				sound.currentTime = 0;
-				toggle_speech.classList.contains("active") ? audioPlayer() : "";
+				setVoiceOverContext(null);
 			}
 
 			resetCatalogueSelect();
